@@ -1,48 +1,51 @@
 import React from "react";
-import { Formik, Form, Field } from "formik";
+import { useFormik } from "formik";
+import * as yup from "yup";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
 
-function validateEmail(value) {
-  let error;
-  if (!value) {
-    error = "Required";
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
-    error = "Invalid email address";
-  }
-  return error;
-}
+const validationSchema = yup.object({
+  email: yup
+    .string("Enter your email")
+    .email("Enter a valid email")
+    .required("Email is required"),
+  password: yup
+    .string("Enter your password")
+    .min(8, "Password should be of minimum 8 characters length")
+    .required("Password is required"),
+});
 
-function validateUsername(value) {
-  let error;
-  if (value === "admin") {
-    error = "Nice try!";
-  }
-  return error;
-}
+const SignUpForm = () => {
+  const formik = useFormik({
+    initialValues: { email: "", password: "" },
+    validationSchema: validationSchema,
+    onSubmit: (values) => {
+      alert(JSON.stringify(values, null, 2));
+    },
+  });
 
-const SignUpForm = () => (
-  <div>
-    <h1>Signup</h1>
-    <Formik
-      initialValues={{
-        username: "",
-        email: "",
-      }}
-      onSubmit={(values) => {
-        // same shape as initial values
-        console.log(values);
-      }}>
-      {({ errors, touched, isValidating }) => (
-        <Form>
-          <Field name="email" validate={validateEmail} />
-          {errors.email && touched.email && <div>{errors.email}</div>}
-
-          <Field name="username" validate={validateUsername} />
-          {errors.username && touched.username && <div>{errors.username}</div>}
-
-          <button type="submit">Submit</button>
-        </Form>
-      )}
-    </Formik>
-  </div>
-);
+  return (
+    <div>
+      <h1>Signup</h1>
+      <form onSubmit={formik.handleSubmit}>
+        <TextField
+          value={formik.values.email}
+          onChange={formik.handleChange}
+          error={formik.toucched.email && Boolean(formik.errors.email)}
+          helperText={formik.touched.email && formik.errors.email}
+        />
+        <TextField
+          value={formik.values.password}
+          onChange={formik.handleChange}
+          error={formik.toucched.password && Boolean(formik.errors.password)}
+          type="password"
+          helperText={formik.touched.password && formik.errors.password}
+        />
+        <Button color="primary" variant="contained" fullWidth type="submit">
+          Submit
+        </Button>
+      </form>
+    </div>
+  );
+};
 export default SignUpForm;
